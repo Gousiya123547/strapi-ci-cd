@@ -1,27 +1,29 @@
-# Use Node.js 18 Alpine base
-FROM node:18-alpine
+# Use Node.js 18 base image
+FROM node:18
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Install OS dependencies (incl. SQLite)
-RUN apk add --no-cache libc6-compat python3 make g++ sqlite sqlite-dev
+# Install system dependencies required for sharp, pg, etc.
+RUN apt-get update && apt-get install -y \
+    python3 make g++ bash \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy only package files first for better caching
+# Copy package files for better caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install all dependencies (including optional like sharp)
+RUN npm install --include=optional
 
-# Copy the rest of the application code
+# Copy the entire project
 COPY . .
 
-# Build the admin panel
+# Build the Strapi admin panel
 RUN npm run build
 
-# Expose Strapi’s default port
+# Expose Strapi's default port
 EXPOSE 1337
 
-# Start Strapi in development mode
-CMD ["npm", "run", "develop"]
+# Start Strapi using the local binary
+CMD ["node", "node_modules/.bin/strapi", "start"]
 
