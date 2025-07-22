@@ -55,7 +55,7 @@ resource "aws_security_group" "strapi_sg" {
 
 # EC2 Instance
 resource "aws_instance" "strapi" {
-  ami                    = "ami-0c02fb55956c7d316"  # Amazon Linux 2 (us-east-2)
+  ami                    = "ami-02b8534ff4b424939"  # Amazon Linux 2 (us-east-2)
   instance_type          = var.ec2_instance_type
   subnet_id              = tolist(data.aws_subnets.default.ids)[0]
   vpc_security_group_ids = [aws_security_group.strapi_sg.id]
