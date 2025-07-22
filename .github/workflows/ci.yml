@@ -30,4 +30,4 @@ jobs:
         run: docker push ${{ secrets.DOCKER_USERNAME }}/strapi-app:${{ env.IMAGE_TAG }}
 
       - name: Show Image Tag
-        run: echo "Pushed Docker image with tag: $IMAGE_TAG"
+        run: echo "Pushed Docker image with tag: \$IMAGE_TAG"
