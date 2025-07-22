@@ -1,4 +1,4 @@
-# Use Node.js 18 base image
+# Use Node.js 18 LTS base image (Debian-based for better compatibility with sharp & pg)
 FROM node:18
 
 # Set the working directory
@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     python3 make g++ bash \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy package files for better caching
+# Copy only package files for better caching of dependencies
 COPY package*.json ./
 
 # Install all dependencies (including optional like sharp)
@@ -24,6 +24,6 @@ RUN npm run build
 # Expose Strapi's default port
 EXPOSE 1337
 
-# Start Strapi using the local binary
-CMD ["node", "node_modules/.bin/strapi", "start"]
+# Start Strapi
+CMD ["npm", "run", "start"]
 
