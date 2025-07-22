@@ -3,6 +3,7 @@ name: CI - Build & Push Strapi Image
 on:
   push:
     branches:
+      - gousiya
       - main
 
 jobs:
