@@ -39,4 +39,3 @@ jobs:
         working-directory: ./terraform2
         run: terraform apply -auto-approve -var="image_tag=${{ github.event.inputs.image_tag }}"
 
-# Trigger commit
