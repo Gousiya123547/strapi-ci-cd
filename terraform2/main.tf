@@ -2,55 +2,19 @@ provider "aws" {
   region = var.aws_region
 }
 
-# VPC
-resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
-  tags = {
-    Name = "strapi-vpc"
-  }
+# Use the default VPC
+data "aws_vpc" "default" {
+  default = true
 }
 
-# Subnet
-resource "aws_subnet" "main" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "${var.aws_region}a"
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "strapi-subnet"
-  }
-}
-
-# Internet Gateway
-resource "aws_internet_gateway" "gw" {
-  vpc_id = aws_vpc.main.id
-  tags = {
-    Name = "strapi-igw"
-  }
-}
-
-# Route Table
-resource "aws_route_table" "rt" {
-  vpc_id = aws_vpc.main.id
-  tags = {
-    Name = "strapi-route-table"
-  }
-}
-
-resource "aws_route" "default" {
-  route_table_id         = aws_route_table.rt.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.gw.id
-}
-
-resource "aws_route_table_association" "subnet_association" {
-  subnet_id      = aws_subnet.main.id
-  route_table_id = aws_route_table.rt.id
+# Use default subnets
+data "aws_subnet_ids" "default" {
+  vpc_id = data.aws_vpc.default.id
 }
 
 # Security Group
 resource "aws_security_group" "strapi_sg" {
-  vpc_id = aws_vpc.main.id
+  vpc_id = data.aws_vpc.default.id
   name   = "strapi-sg"
 
   ingress {
@@ -90,7 +54,7 @@ resource "aws_security_group" "strapi_sg" {
 resource "aws_instance" "strapi" {
   ami                    = "ami-0c02fb55956c7d316"  # Amazon Linux 2 (us-east-2)
   instance_type          = var.ec2_instance_type
-  subnet_id              = aws_subnet.main.id
+  subnet_id              = data.aws_subnet_ids.default.ids[0]
   vpc_security_group_ids = [aws_security_group.strapi_sg.id]
   key_name               = var.ssh_key_name
 
