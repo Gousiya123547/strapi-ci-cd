@@ -15,10 +15,10 @@ data "aws_subnets" "default" {
   }
 }
 
-# Security Group
+# Security Group with dynamic name
 resource "aws_security_group" "strapi_sg" {
   vpc_id = data.aws_vpc.default.id
-  name   = "strapi-sg"
+  name   = "strapi-sg-${replace(timestamp(), ":", "-")}" # Dynamic unique name
 
   ingress {
     from_port   = 22
@@ -55,7 +55,7 @@ resource "aws_security_group" "strapi_sg" {
 
 # EC2 Instance
 resource "aws_instance" "strapi" {
-  ami                    = "ami-0c02fb55956c7d316"  # Amazon Linux 2 AMI for us-east-2
+  ami                    = "ami-0c02fb55956c7d316"  # Amazon Linux 2 (us-east-2)
   instance_type          = var.ec2_instance_type
   subnet_id              = tolist(data.aws_subnets.default.ids)[0]
   vpc_security_group_ids = [aws_security_group.strapi_sg.id]
