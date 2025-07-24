@@ -1,5 +1,5 @@
-output "ec2_public_ip" {
-  description = "Public IP of the Strapi EC2 instance"
-  value       = aws_instance.strapi_ec2.public_ip
+output "strapi_url" {
+  description = "Public URL for Strapi (ALB)"
+  value       = aws_lb.strapi_alb.dns_name
 }
 

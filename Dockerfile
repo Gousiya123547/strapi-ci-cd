@@ -1,29 +1,39 @@
-# Use Node.js 18 LTS base image (Debian-based for better compatibility with sharp & pg)
+# Use Node.js 18 LTS
 FROM node:18
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Install system dependencies required for sharp, pg, etc.
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    python3 make g++ bash \
+    python3 make g++ bash sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only package files for better caching of dependencies
+# Copy package files and install dependencies
 COPY package*.json ./
+RUN npm install --include=optional --production
 
-# Install all dependencies (including optional like sharp)
-RUN npm install --include=optional
-
-# Copy the entire project
+# Copy project files
 COPY . .
 
-# Build the Strapi admin panel
+# Ensure SQLite database file exists
+RUN [ ! -f /app/data.db ] && touch /app/data.db || true
+
+# Environment variables for Strapi
+ENV APP_KEYS="key1,key2,key3,key4"
+ENV API_TOKEN_SALT="randomSaltValue"
+ENV ADMIN_JWT_SECRET="adminJwtSecretKey"
+ENV JWT_SECRET="jwtSecretKey"
+ENV NODE_ENV=production
+ENV DATABASE_CLIENT=sqlite
+ENV DATABASE_FILENAME=/app/data.db
+
+# Build Strapi admin panel
 RUN npm run build
 
-# Expose Strapi's default port
+# Expose port
 EXPOSE 1337
 
-# Start Strapi
-CMD ["npm", "run", "start"]
+# Start Strapi (fallback to sleep for debugging)
+CMD ["sh", "-c", "npm run start || sleep 3600"]
 
